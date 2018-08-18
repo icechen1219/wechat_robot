@@ -44,8 +44,7 @@ DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
 # 基本的日志系统配置
 # logging.basicConfig(filename='wechat.log', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
 # 定义一个RotatingFileHandler，最多备份5个日志文件，每个日志文件最大2M
-Rthandler = RotatingFileHandler(
-    'event.log', maxBytes=2 * 1024 * 1024, backupCount=5)
+Rthandler = RotatingFileHandler('event.log', maxBytes=2 * 1024 * 1024, backupCount=5)
 Rthandler.setLevel(logging.DEBUG)  # 日志处理器的日志级别，只能等于或高于root的日志级别
 formatter = logging.Formatter(LOG_FORMAT, DATE_FORMAT)
 Rthandler.setFormatter(formatter)
@@ -68,8 +67,7 @@ def private_text_reply(msg):
     # 注意根据用户ID查找与根据昵称查找的区别，根据ID查找是唯一结果，所以不能在后面加[0]
     from_user = itchat.search_friends(userName=msg.fromUserName)
     logging.info(from_user)
-    match_obj = re.search(r'(哈迪斯|阿里巴巴|Ally|大姐)',
-                          from_user.nickName, re.M | re.I)
+    match_obj = re.search(r'(哈迪斯|阿里巴巴|Ally|大姐)', from_user.nickName, re.M | re.I)
     if match_obj:  # 过滤一些好友，不自动回复
         logging.info('pass self msg...')
         return
@@ -116,12 +114,10 @@ def download_files(msg):
             msg_counter[msg['ActualNickName']] += 1  # 记录发言次数
             # 2018.8.16 优化程序逻辑，先判断能否回复，再生成回复信息
             if can_reply(msg['ActualNickName']):
-                reply_msg = generate_reply_msg(
-                    msg.fileName, msg['ActualNickName'])
+                reply_msg = generate_reply_msg(msg.fileName, msg['ActualNickName'])
                 if reply_msg:
                     itchat.send(reply_msg, from_group)
-                    reply_msg_time[msg['ActualNickName']
-                    ] = time.time()  # 记录回复时间
+                    reply_msg_time[msg['ActualNickName']] = time.time()  # 记录回复时间
         else:
             logging.info("此群不用回复！")
 

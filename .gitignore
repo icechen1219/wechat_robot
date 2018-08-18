@@ -1,0 +1,11 @@
+.idea
+.pytest_cache
+analyse.py
+event.log
+jieba_test.py
+render.html
+test.html
+test.py
+wechat.log
+*.html
+

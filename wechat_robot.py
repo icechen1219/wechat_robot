@@ -15,6 +15,7 @@ from collections import Counter
 import os
 import jieba.analyse
 from pyecharts import WordCloud
+from urllib.parse import quote
 
 message_dict = {
     "老三": "更多好玩的内容请关注微信小程序：威扬咨询。",
@@ -43,7 +44,8 @@ DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
 # 基本的日志系统配置
 # logging.basicConfig(filename='wechat.log', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
 # 定义一个RotatingFileHandler，最多备份5个日志文件，每个日志文件最大2M
-Rthandler = RotatingFileHandler('event.log', maxBytes=2 * 1024 * 1024, backupCount=5)
+Rthandler = RotatingFileHandler(
+    'event.log', maxBytes=2 * 1024 * 1024, backupCount=5)
 Rthandler.setLevel(logging.DEBUG)  # 日志处理器的日志级别，只能等于或高于root的日志级别
 formatter = logging.Formatter(LOG_FORMAT, DATE_FORMAT)
 Rthandler.setFormatter(formatter)
@@ -66,7 +68,8 @@ def private_text_reply(msg):
     # 注意根据用户ID查找与根据昵称查找的区别，根据ID查找是唯一结果，所以不能在后面加[0]
     from_user = itchat.search_friends(userName=msg.fromUserName)
     logging.info(from_user)
-    match_obj = re.search(r'(哈迪斯|阿里巴巴|Ally|大姐)', from_user.nickName, re.M | re.I)
+    match_obj = re.search(r'(哈迪斯|阿里巴巴|Ally|大姐)',
+                          from_user.nickName, re.M | re.I)
     if match_obj:  # 过滤一些好友，不自动回复
         logging.info('pass self msg...')
         return
@@ -113,10 +116,12 @@ def download_files(msg):
             msg_counter[msg['ActualNickName']] += 1  # 记录发言次数
             # 2018.8.16 优化程序逻辑，先判断能否回复，再生成回复信息
             if can_reply(msg['ActualNickName']):
-                reply_msg = generate_reply_msg(msg.fileName, msg['ActualNickName'])
+                reply_msg = generate_reply_msg(
+                    msg.fileName, msg['ActualNickName'])
                 if reply_msg:
                     itchat.send(reply_msg, from_group)
-                    reply_msg_time[msg['ActualNickName']] = time.time()  # 记录回复时间
+                    reply_msg_time[msg['ActualNickName']
+                    ] = time.time()  # 记录回复时间
         else:
             logging.info("此群不用回复！")
 
@@ -144,9 +149,9 @@ def group_text_reply(msg):
     # 每晚10点，总结当天的聊天主题，以词云形式发出去
     now = time.time()
     if time.localtime(now).tm_hour == 22 and len(messages_counter) > 50:
-        name_list, num_list = counter2list(messages_counter.most_common(100))
+        name_list, num_list = counter2list(messages_counter.most_common(200))
         word_cloud('今日话题', name_list, num_list, [20, 100])
-        itchat.send('今日话题总结：%s' % 'http://123.207.123.239/wechat/今日话题.html', money_user_list)
+        itchat.send(u'今日话题总结：\nhttps:loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'), money_user_list)
         messages_counter.clear()
     # 处理艾特我的信息，给予简单自动回复
     if msg['IsAt']:
@@ -177,9 +182,6 @@ def receive_red_packet(msg):
         if msg['FromUserName'] == money_user_list:  # 2018.8.6 过滤本群的红包通知
             logging.info(u"同一个群的红包不通知...")
             return
-        # for g in groups:
-        #     if msg['FromUserName'] == g['UserName']:  # 根据群消息的FromUserName匹配是哪个群，用msg['User']['NickName']代替
-        #         group_name = g['NickName']
         match_obj = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
         if match_obj:
             msgbody = u'"%s"群红包,@Tonny @All' % group_name
@@ -242,7 +244,8 @@ def generate_reply_msg(image_file_name, user_name):
     res_list = json.loads(r.text)
     if res_list['errorCode'] == 0:  # 正常返回数据
         if res_list['faceCount'] > 0:
-            reply_msg = guess_person_action(res_list['faceCount'], res_list)  # 猜测人的行为
+            reply_msg = guess_person_action(
+                res_list['faceCount'], res_list)  # 猜测人的行为
         else:
             logging.info('删掉非人类的图片')
             os.remove(image_file_name)  # 人脸以外的图片删掉，浪费内存
@@ -379,7 +382,7 @@ def word_cloud(item_name, item_name_list, item_num_list, word_size_range):
     :param word_size_range: 单词字体大小范围
     :return:
     """
-    wordcloud = WordCloud(width=800, height=600)
+    wordcloud = WordCloud(width=1400, height=900)
     # 生成的词云图轮廓， 有'circle', 'cardioid', 'diamond', 'triangle-forward', 'triangle', 'pentagon', 'star'可选
     wordcloud.add("", item_name_list, item_num_list,
                   word_size_range=word_size_range, shape='circle')

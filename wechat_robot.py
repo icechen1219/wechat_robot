@@ -146,7 +146,7 @@ def group_text_reply(msg):
     now = time.time()
     if time.localtime(now).tm_hour == 22 and len(messages_counter) > 50:
         name_list, num_list = counter2list(messages_counter.most_common(200))
-        word_cloud('今日话题', name_list, num_list, [20, 100])
+        word_cloud('今日话题', name_list, num_list, [12, 108])  # 字体最小12,最大108
         itchat.send(u'今日话题总结：\nhttps:loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'), money_user_list)
         messages_counter.clear()
     # 处理艾特我的信息，给予简单自动回复

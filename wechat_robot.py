@@ -240,8 +240,7 @@ def generate_reply_msg(image_file_name, user_name):
     res_list = json.loads(r.text)
     if res_list['errorCode'] == 0:  # 正常返回数据
         if res_list['faceCount'] > 0:
-            reply_msg = guess_person_action(
-                res_list['faceCount'], res_list)  # 猜测人的行为
+            reply_msg = guess_person_action(res_list['faceCount'], res_list)  # 猜测人的行为
         else:
             logging.info('删掉非人类的图片')
             os.remove(image_file_name)  # 人脸以外的图片删掉，浪费内存

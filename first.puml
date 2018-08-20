@@ -1,0 +1,25 @@
+@startuml
+title deal @me business logic
+start
+if (first @) then (yes)
+  :reply from dict;
+elseif (too many @ in 90 sec) then (yes)
+  :reply warning words;
+else (nothing)
+endif
+stop
+@enduml
+
+@startuml
+title first @me business logic
+start
+if(nature first @) then (yes)
+  :return True;
+elseif (90 sec time out) then (yes)
+  :reset @ times=1;
+  :return True;
+else (nothing)
+  :return False;
+endif
+stop
+@enduml

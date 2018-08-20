@@ -33,8 +33,9 @@ reply_msg_time = {}  # 记录回复同一个人的时间
 at_msg_counter = Counter()
 first_at_time = {}
 # 红包通知群
-money_user_list = ''
+money_notify_groups = ''
 groups = None
+notify_user = None
 
 messages_counter = Counter()  # 聊天记录关键词
 
@@ -102,7 +103,7 @@ def download_files(msg):
         # 获取名字中含有特定字符的群聊，返回值为一个字典的列表
         from_group = msg['FromUserName']
         group_name = msg['User']['NickName']  # 群名
-        match_obj = re.search(r'(兄弟|败友)', group_name, re.M | re.I)
+        match_obj = re.search(r'(兄弟|败友|广州|读书)', group_name, re.M | re.I)
         if match_obj:
             # msg.download(msg.fileName)
             msg['Text'](msg['FileName'])  # 先下载至本地，分析结束再决定是否删除
@@ -129,31 +130,33 @@ def group_text_reply(msg):
     :param msg:
     :return:
     """
-    logging.debug('收到一条群消息')
+    group_name = msg['User']['NickName']  # 群名
+    logging.debug('收到一条%s群的消息', group_name)
     # TODO: 记录群聊信息，定期写入文件
-    global money_user_list
+    global money_notify_groups
     global groups
-    if len(money_user_list) == 0:  # 因为群组搜索会产生网络请求，所以只在第一次搜索
+    if len(money_notify_groups) == 0:  # 因为群组搜索会产生网络请求，所以只在第一次搜索
         groups = itchat.get_chatrooms(update=True)
         users = itchat.search_chatrooms(name=u'败友')  # 把红包消息通知给这个群
-        money_user_list = users[0]['UserName']  # 获取这个群的唯一标识
-        logging.info(money_user_list)
+        money_notify_groups = users[0]['UserName']  # 获取这个群的唯一标识
+        logging.info(money_notify_groups)
     from_group_id_ = msg['FromUserName']  # 收到消息的群的标识
-    if from_group_id_ == money_user_list:  # 2018.8.17 只记录本群的聊天记录
-        logging.debug(u"记录败友群聊天记录...%s", money_user_list)
+    if from_group_id_ == money_notify_groups:  # 2018.8.17 只记录本群的聊天记录
+        logging.debug(u"记录败友群聊天记录...%s", money_notify_groups)
         get_tag(msg['Content'], messages_counter)
     # 每晚10点，总结当天的聊天主题，以词云形式发出去
     now = time.time()
     if time.localtime(now).tm_hour == 22 and len(messages_counter) > 50:
         name_list, num_list = counter2list(messages_counter.most_common(200))
         word_cloud('今日话题', name_list, num_list, [12, 108])  # 字体最小12,最大108
-        itchat.send(u'今日话题总结：\nhttps:loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'), money_user_list)
+        itchat.send(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'), money_notify_groups)
         messages_counter.clear()
     # 处理艾特我的信息，给予简单自动回复
+    match_obj = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
+    if match_obj == '':  # 只处理上述群
+        return
     if msg['IsAt']:
         at_msg_counter[from_group_id_] += 1
-        if at_msg_counter[from_group_id_] == 1:  # 如果是首次艾特，则记录时间，以备后续判断
-            first_at_time[from_group_id_] = time.time()
         reply_msg = deal_at_msg(from_group_id_)
         if reply_msg:
             itchat.send(reply_msg, from_group_id_)
@@ -169,21 +172,22 @@ def receive_red_packet(msg):
     if u"收到红包" in msg['Content']:
         logging.info(u'收到一个群红包')
         group_name = msg['User']['NickName']  # 群名
-        global money_user_list, groups
-        if len(money_user_list) == 0:  # 因为群组搜索会产生网络请求，所以只在第一次搜索
+        global money_notify_groups, groups
+        if len(money_notify_groups) == 0:  # 因为群组搜索会产生网络请求，所以只在第一次搜索
             groups = itchat.get_chatrooms(update=True)
             users = itchat.search_chatrooms(name=u'败友')  # 把红包消息通知给这个群
-            money_user_list = users[0]['UserName']  # 获取这个群的唯一标示
-            logging.info(money_user_list)
-        if msg['FromUserName'] == money_user_list:  # 2018.8.6 过滤本群的红包通知
+            money_notify_groups = users[0]['UserName']  # 获取这个群的唯一标示
+            logging.info(money_notify_groups)
+        if msg['FromUserName'] == money_notify_groups:  # 2018.8.6 过滤本群的红包通知
             logging.info(u"同一个群的红包不通知...")
             return
         match_obj = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
         if match_obj:
             msgbody = u'"%s"群红包,@Tonny @All' % group_name
-            itchat.send(msgbody, toUserName=money_user_list)  # 告诉指定的好友群内有红包
+            itchat.send(msgbody, toUserName=money_notify_groups)  # 告诉指定的好友群内有红包
         else:
             logging.info("此群红包不用通知那帮二货...")
+        notify_user.send(u'"%s"群红包' % group_name)  # 通知我自己的小号
 
 
 def deal_at_msg(to_group):
@@ -196,22 +200,38 @@ def deal_at_msg(to_group):
     :return: 不同情形下的回复内容，或空
     """
     tmp_msg = ''
-    if at_msg_counter[to_group] <= 1:
+    if is_first_at(to_group):  # 如果是首次艾特，则记录时间，以备后续判断
+        first_at_time[to_group] = time.time()
         tmp_msg = at_msg_dict[random.randint(len(at_msg_dict))]
         logging.info('第一次被艾特：%s', tmp_msg)
-    elif is_at_too_many(to_group, time.time()):
+    elif is_at_too_many(to_group):
         tmp_msg = ['皮这一下，你们开心了？', '艾特我这么多次，是想发红包吗？', '这么多人想我了？', '爱我你就大声说，何必艾特这么多^_^', '艾特这么多，累不？'][random.randint(5)]
         logging.info(tmp_msg)
     return tmp_msg
 
 
-def is_at_too_many(to_group, now):
+def is_first_at(to_group):
+    """
+    判断是否是首次艾特，业务逻辑参考对应的uml图
+    :param to_group: 所在群
+    :return: True - 首次@，False - 非首次@
+    """
+    now = time.time()
+    if at_msg_counter[to_group] <= 1:
+        return True
+    elif (now - first_at_time[to_group]) > 90:
+        at_msg_counter[to_group] = 1
+        return True
+    return False
+
+
+def is_at_too_many(to_group):
     """
     判断短时间是否被艾特多次
     :param to_group: 所在群
-    :param now: 当前时间
     :return: True - 恶意艾特，False - 非恶意
     """
+    now = time.time()
     logging.debug(at_msg_counter)
     logging.debug(first_at_time)
     at_num = at_msg_counter[to_group]
@@ -219,8 +239,8 @@ def is_at_too_many(to_group, now):
     if (now - at_time) <= 90:  # 设1.5分钟为监测期限
         if at_num >= 5:
             return True
-    else:  # 超过监测期限重置数据
-        at_msg_counter[to_group] = 0
+    else:  # 超过监测期限重置@状态为第一条
+        at_msg_counter[to_group] = 1
     return False
 
 
@@ -379,8 +399,7 @@ def word_cloud(item_name, item_name_list, item_num_list, word_size_range):
     """
     wordcloud = WordCloud(width=1400, height=900)
     # 生成的词云图轮廓， 有'circle', 'cardioid', 'diamond', 'triangle-forward', 'triangle', 'pentagon', 'star'可选
-    wordcloud.add("", item_name_list, item_num_list,
-                  word_size_range=word_size_range, shape='circle')
+    wordcloud.add("", item_name_list, item_num_list, word_size_range=word_size_range, shape='circle')
     out_file_name = '/virtualhost/webapp/love/wechat/' + item_name + '.html'
     wordcloud.render(out_file_name)
 
@@ -389,8 +408,8 @@ if __name__ == '__main__':
     itchat.auto_login(enableCmdQR=2)  # 在命令行打开二维码
 
     friends = itchat.get_friends(update=True)[0:]  # 获取好友信息
-
-    user = itchat.search_friends(name=u'哈迪斯')[0]
-    user.send(u'hello,这是一条来自机器人的消息')
+    global notify_user
+    notify_user = itchat.search_friends(name=u'威扬咨询')[0]
+    notify_user.send(u'hello,这是一条来自机器人的消息')
     logging.warning(u'hello,这是一条来自机器人的消息')
     itchat.run()

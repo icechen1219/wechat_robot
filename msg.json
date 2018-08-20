@@ -1,0 +1,560 @@
+{
+  'MsgId': '7087678064398968620',
+  'FromUserName': '@664808924df5468a9f74a0a417c0038d6fa330730d262986453cafb91bd8c7d9',
+  'ToUserName': '@@b92bd442b27192a35bb0d5fbdde1521b4a4d7c1d4f66fa0a71fff8e78c034dee',
+  'MsgType': 1,
+  'Content': '你大保健还有时间看股票？',
+  'Status': 3,
+  'ImgStatus': 1,
+  'CreateTime': 1534738121,
+  'VoiceLength': 0,
+  'PlayLength': 0,
+  'FileName': '',
+  'FileSize': '',
+  'MediaId': '',
+  'Url': '',
+  'AppMsgType': 0,
+  'StatusNotifyCode': 0,
+  'StatusNotifyUserName': '',
+  'RecommendInfo': {
+    'UserName': '',
+    'NickName': '',
+    'QQNum': 0,
+    'Province': '',
+    'City': '',
+    'Content': '',
+    'Signature': '',
+    'Alias': '',
+    'Scene': 0,
+    'VerifyFlag': 0,
+    'AttrStatus': 0,
+    'Sex': 0,
+    'Ticket': '',
+    'OpCode': 0
+  },
+  'ForwardFlag': 0,
+  'AppInfo': {
+    'AppID': '',
+    'Type': 0
+  },
+  'HasProductId': 0,
+  'Ticket': '',
+  'ImgHeight': 0,
+  'ImgWidth': 0,
+  'SubMsgType': 0,
+  'NewMsgId': 7087678064398968620,
+  'OriContent': '',
+  'EncryFileName': '',
+  'ActualNickName': '哈迪斯',
+  'IsAt': False,
+  'ActualUserName': '@664808924df5468a9f74a0a417c0038d6fa330730d262986453cafb91bd8c7d9',
+  'User': <Chatroom
+  : {
+  'MemberList': <ContactList
+  : [
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@13f03bcfd1dd5286d5b4e07027b63301',
+  'NickName'
+  :
+  '伶牙俐齿美丽大方敢爱敢恨小美编',
+  'AttrStatus'
+  :
+  2147585469,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  'han'
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@e564928562f1811ec4e8b06bafe4d2d9584012b3cefc65c86fa040583108b425',
+  'NickName'
+  :
+  '豪气冲天富得流油盐田一霸小道士',
+  'AttrStatus'
+  :
+  33634277,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@8e47b5dcbf6cc150eb51723242cadaac30afdf3b985e03c1a606f744f8c2a33d',
+  'NickName'
+  :
+  '靡颜腻理清新脱俗天生名媛金融花',
+  'AttrStatus'
+  :
+  2147718393,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@a900159a8bb497957fa61fe08e946f88',
+  'NickName'
+  :
+  '英雄少年才华横溢学术泰斗张师弟',
+  'AttrStatus'
+  :
+  2147582527,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  'zxl'
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@553ff9157c14a5795d4b0e75c4f7271b',
+  'NickName'
+  :
+  '青春活力大气磅礴风风火火崔才女',
+  'AttrStatus'
+  :
+  2147591615,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  'Tra'
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@f8161d3bcfc9291cc99b4a70949ee914a499f3875aaa1778f32e7182b63c2026',
+  'NickName'
+  :
+  '虓虓',
+  'AttrStatus'
+  :
+  2147586085,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@3fdc51c2c39068374097a299dae894d76e2e1b801a4fd3630a3776ef4f007102',
+  'NickName'
+  :
+  '玉树临风才高八斗文艺神棍梅花刚',
+  'AttrStatus'
+  :
+  2147585981,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@0a445cee5a78747e65b85f8935de7ef579f765b1591cc53bf9530b320b14a670',
+  'NickName'
+  :
+  'sunnyfan',
+  'AttrStatus'
+  :
+  102461,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@664808924df5468a9f74a0a417c0038d6fa330730d262986453cafb91bd8c7d9',
+  'NickName'
+  :
+  '哈迪斯',
+  'AttrStatus'
+  :
+  17024957,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@7144e99e9ecb868e28bd001b61e1080eb38de0cde8d6e4423765e58124159627',
+  'NickName'
+  :
+  '半卖半送半推半就扮猪吃虎咪咪周',
+  'AttrStatus'
+  :
+  2147720895,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@89cce202973d557475c921389791c131b2e922bfd09518a12b55aeee9938ce6b',
+  'NickName'
+  :
+  '淡如水',
+  'AttrStatus'
+  :
+  100605,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >,
+  <ChatroomMember
+  :
+  {
+    'MemberList': <ContactList
+    :
+  []
+  >,
+  'Uin'
+  :
+  0,
+  'UserName'
+  :
+  '@d28d68be88da07707b29f14343be7e946fedab22b18c0f79aa5d6159f92d8408',
+  'NickName'
+  :
+  '沉鱼落雁知性丽人金融学霸霍思燕',
+  'AttrStatus'
+  :
+  233509,
+  'PYInitial'
+  :
+  '',
+  'PYQuanPin'
+  :
+  '',
+  'RemarkPYInitial'
+  :
+  '',
+  'RemarkPYQuanPin'
+  :
+  '',
+  'MemberStatus'
+  :
+  0,
+  'DisplayName'
+  :
+  '',
+  'KeyWord'
+  :
+  ''
+  }
+  >
+]>, 'Uin': 0, 'UserName': '@@b92bd442b27192a35bb0d5fbdde1521b4a4d7c1d4f66fa0a71fff8e78c034dee', 'NickName': '西大打雀互捅败友群', 'HeadImgUrl': '/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=673827168&username=@@b92bd442b27192a35bb0d5fbdde1521b4a4d7c1d4f66fa0a71fff8e78c034dee&skey=', 'ContactFlag': 3, 'MemberCount': 12, 'RemarkName': '', 'HideInputBarFlag': 0, 'Sex': 0, 'Signature': '', 'VerifyFlag': 0, 'OwnerUin': 0, 'PYInitial': 'XDDQHTBYQ', 'PYQuanPin': 'xidadaqiaohutongbaiyouqun', 'RemarkPYInitial': '', 'RemarkPYQuanPin': '', 'StarFriend': 0, 'AppAccountFlag': 0, 'Statues': 1, 'AttrStatus': 0, 'Province': '', 'City': '', 'Alias': '', 'SnsFlag': 0, 'UniFriend': 0, 'DisplayName': '', 'ChatRoomId': 0, 'KeyWord': '', 'EncryChatRoomId': '@f6a2993b64614c600f72e3549a956f37', 'IsOwner': 0, 'IsAdmin': None, 'Self': <ChatroomMember: {'MemberList': <ContactList: []>, 'Uin': 0, 'UserName': '@664808924df5468a9f74a0a417c0038d6fa330730d262986453cafb91bd8c7d9', 'NickName': '哈迪斯', 'AttrStatus': 17024957, 'PYInitial': '', 'PYQuanPin': '', 'RemarkPYInitial': '', 'RemarkPYQuanPin': '', 'MemberStatus': 0, 'DisplayName': '', 'KeyWord': ''}>}>, 'Type': 'Text', 'Text': '你大保健还有时间看股票？'
+}

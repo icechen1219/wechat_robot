@@ -408,7 +408,6 @@ if __name__ == '__main__':
     itchat.auto_login(enableCmdQR=2)  # 在命令行打开二维码
 
     friends = itchat.get_friends(update=True)[0:]  # 获取好友信息
-    global notify_user
     notify_user = itchat.search_friends(name=u'威扬咨询')[0]
     notify_user.send(u'hello,这是一条来自机器人的消息')
     logging.warning(u'hello,这是一条来自机器人的消息')

@@ -9,14 +9,6 @@ python3 wechat_robot.py
 ```
 then, use wechat scan the qrcode and enjoy it.
 
---- pls ignore contents just like below  
-**Bold text**  
-*Italic text*  
-==highlight text==  
---------
-* list1
-* list2
-* list3
-* list4
->quote some words  
-[hyperlink](http://www.baidu.com)
+contents bellow was forked by saga618:  
+for pull requests test in github  
+have fun^_^  

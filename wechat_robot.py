@@ -15,6 +15,8 @@ from collections import Counter
 import os
 import jieba.analyse
 from pyecharts import WordCloud
+from pyecharts import Bar
+from pyecharts import Grid
 from urllib.parse import quote
 
 message_dict = {
@@ -38,6 +40,7 @@ groups = None
 notify_user = None
 
 messages_counter = Counter()  # 聊天记录关键词
+user_talk_counter = Counter()  # 发言次数统计
 
 #################################################################################################
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
@@ -103,9 +106,8 @@ def download_files(msg):
         # 获取名字中含有特定字符的群聊，返回值为一个字典的列表
         from_group = msg['FromUserName']
         group_name = msg['User']['NickName']  # 群名
-        match_obj = re.search(r'(兄弟|败友|广州|读书)', group_name, re.M | re.I)
-        if match_obj:
-            # msg.download(msg.fileName)
+        match_groups = re.search(r'(兄弟|败友|广州|读书|重庆)', group_name, re.M | re.I)
+        if match_groups:
             msg['Text'](msg['FileName'])  # 先下载至本地，分析结束再决定是否删除
             type_symbol = {PICTURE: 'img', VIDEO: 'vid', }.get(msg.type, 'fil')
             logging.debug('@%s@%s', type_symbol, msg.fileName)
@@ -139,18 +141,29 @@ def group_text_reply(msg):
         groups = itchat.get_chatrooms(update=True)
         users = itchat.search_chatrooms(name=u'败友')  # 把红包消息通知给这个群
         money_notify_groups = users[0]['UserName']  # 获取这个群的唯一标识
-        logging.info(money_notify_groups)
+        logging.info(u'已获得败友群id: %s' % money_notify_groups)
+
     from_group_id_ = msg['FromUserName']  # 收到消息的群的标识
-    if from_group_id_ == money_notify_groups:  # 2018.8.17 只记录本群的聊天记录
+    # 2018.8.17 只记录本群的聊天记录; 2018.8.21 增加我发出去的消息的判断
+    if from_group_id_ == money_notify_groups or msg['ToUserName'] == money_notify_groups:
         logging.debug(u"记录败友群聊天记录...%s", money_notify_groups)
         get_tag(msg['Content'], messages_counter)
-    # 每晚10点，总结当天的聊天主题，以词云形式发出去
+        # 2018.8.21 统计发言人的发言次数
+        user_talk_counter[msg['ActualNickName']] += 1
+        logging.debug(user_talk_counter)
+
+    # 每晚10点，总结当天的聊天主题，以词云形式发出去; 2018.8.21 增加话唠排行榜
     now = time.time()
-    if time.localtime(now).tm_hour == 22 and len(messages_counter) > 50:
-        name_list, num_list = counter2list(messages_counter.most_common(200))
+    if time.localtime(now).tm_hour == 22 and len(messages_counter) > 100:
+        name_list, num_list = counter2list(messages_counter.most_common(150))
         word_cloud('今日话题', name_list, num_list, [12, 108])  # 字体最小12,最大108
         itchat.send(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'), money_notify_groups)
+        name_list, num_list = counter2list(user_talk_counter.most_common(10))  # 话唠前十名
+        get_bar('今日话唠', name_list, num_list)
+        itchat.send(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话唠.html', 'utf-8'), money_notify_groups)
         messages_counter.clear()
+        user_talk_counter.clear()
+
     # 处理艾特我的信息，给予简单自动回复
     match_obj = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
     if match_obj == '':  # 只处理上述群
@@ -187,7 +200,10 @@ def receive_red_packet(msg):
             itchat.send(msgbody, toUserName=money_notify_groups)  # 告诉指定的好友群内有红包
         else:
             logging.info("此群红包不用通知那帮二货...")
-        notify_user.send(u'"%s"群红包' % group_name)  # 通知我自己的小号
+
+        pass_groups = re.search(r'达令|珠海', group_name, re.M | re.I)
+        if pass_groups == '':  # 以上群不通知小号
+            notify_user.send(u'"%s"群红包' % group_name)  # 通知我自己的小号
 
 
 def deal_at_msg(to_group):
@@ -402,6 +418,28 @@ def word_cloud(item_name, item_name_list, item_num_list, word_size_range):
     wordcloud.add("", item_name_list, item_num_list, word_size_range=word_size_range, shape='circle')
     out_file_name = '/virtualhost/webapp/love/wechat/' + item_name + '.html'
     wordcloud.render(out_file_name)
+
+
+def get_bar(item_name, item_name_list, item_num_list):
+    """
+    根据key、value的对应list生成柱状图
+    :param item_name: 文件名
+    :param item_name_list: 柱状图的x坐标
+    :param item_num_list: 柱状图的y坐标
+    :return:
+    """
+    subtitle = "败友群友情统计^_^"
+    bar = Bar(item_name, page_title=item_name, title_text_size=30, title_pos='center', subtitle=subtitle,
+              subtitle_text_size=25)
+
+    bar.add("", item_name_list, item_num_list, title_pos='center', xaxis_interval=0, xaxis_rotate=27,
+            xaxis_label_textsize=20, yaxis_label_textsize=20, yaxis_name_pos='end', yaxis_pos="%50")
+    bar.show_config()
+
+    grid = Grid(width=1300, height=800)
+    grid.add(bar, grid_top="13%", grid_bottom="23%", grid_left="15%", grid_right="15%")
+    out_file_name = '/virtualhost/webapp/love/wechat/' + item_name + '.html'
+    grid.render(out_file_name)
 
 
 if __name__ == '__main__':

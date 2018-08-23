@@ -29,7 +29,7 @@ message_dict = {
 at_msg_dict = ['收到', '这...', '在', '套我话？', '咋啦？', '哦哦', '我不在', '我是隐身的', 'copy that', '……', '哈', '吼吼', '赫赫', '汗']
 
 # 用于控制反复发图片的逻辑处理
-msg_counter = Counter()  # 记录同一个人发言次数
+file_msg_counter = Counter()  # 记录同一个人发图次数
 reply_msg_time = {}  # 记录回复同一个人的时间
 # 用于控制同一个群恶意艾特我的逻辑处理
 at_msg_counter = Counter()
@@ -49,7 +49,7 @@ DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
 # logging.basicConfig(filename='wechat.log', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
 # 定义一个RotatingFileHandler，最多备份5个日志文件，每个日志文件最大2M
 Rthandler = RotatingFileHandler('event.log', maxBytes=2 * 1024 * 1024, backupCount=5)
-Rthandler.setLevel(logging.DEBUG)  # 日志处理器的日志级别，只能等于或高于root的日志级别
+Rthandler.setLevel(logging.INFO)  # 日志处理器的日志级别，只能等于或高于root的日志级别
 formatter = logging.Formatter(LOG_FORMAT, DATE_FORMAT)
 Rthandler.setFormatter(formatter)
 logger = logging.getLogger('')
@@ -114,7 +114,7 @@ def download_files(msg):
             logging.info('文件来自群：')
             logging.info(group_name)
 
-            msg_counter[msg['ActualNickName']] += 1  # 记录发言次数
+            file_msg_counter[msg['ActualNickName']] += 1  # 记录发言次数
             # 2018.8.16 优化程序逻辑，先判断能否回复，再生成回复信息
             if can_reply(msg['ActualNickName']):
                 reply_msg = generate_reply_msg(msg.fileName, msg['ActualNickName'])
@@ -133,7 +133,7 @@ def group_text_reply(msg):
     :return:
     """
     group_name = msg['User']['NickName']  # 群名
-    logging.debug('收到一条%s群的消息', group_name)
+    logging.debug('收到一条%s群的消息:%s', group_name, msg['Content'])
     # TODO: 记录群聊信息，定期写入文件
     global money_notify_groups
     global groups
@@ -166,7 +166,7 @@ def group_text_reply(msg):
 
     # 处理艾特我的信息，给予简单自动回复
     match_obj = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
-    if match_obj == '':  # 只处理上述群
+    if match_obj is None:  # 只处理上述群
         return
     if msg['IsAt']:
         at_msg_counter[from_group_id_] += 1
@@ -201,8 +201,8 @@ def receive_red_packet(msg):
         else:
             logging.info("此群红包不用通知那帮二货...")
 
-        pass_groups = re.search(r'达令|珠海', group_name, re.M | re.I)
-        if pass_groups == '':  # 以上群不通知小号
+        pass_groups = re.search(r'达令', group_name, re.M | re.I)
+        if pass_groups is None:  # 以上群不通知小号
             notify_user.send(u'"%s"群红包' % group_name)  # 通知我自己的小号
 
 
@@ -355,7 +355,7 @@ def can_reply(to_user):
 
     # logging.info(msg_counter)
     # logging.info(msg_time)
-    if msg_counter[to_user] == 1:  # 因为程序是先计数再调用此函数判断的，所以起始数为1
+    if file_msg_counter[to_user] == 1:  # 因为程序是先计数再调用此函数判断的，所以起始数为1
         return True
     # 此人已经发过一次信息了,所以需要判断时间
     if to_user not in reply_msg_time:  # 从来没有回复过
@@ -364,7 +364,7 @@ def can_reply(to_user):
     pause_time = time.time() - reply_msg_time[to_user]  # 秒为单位
     if pause_time > 10 * 60:  # 间隔时间如果超过10分钟，则重置消息统计次数
         logging.info('暂停时间已超过10分钟，可以回复了')
-        msg_counter[to_user] = 1  # 因为返回True会触发一次回复，故而设为1而不是0
+        file_msg_counter[to_user] = 1  # 因为返回True会触发一次回复，故而设为1而不是0
         return True
     else:
         logging.info('暂停10分钟再回复[%s]', to_user)

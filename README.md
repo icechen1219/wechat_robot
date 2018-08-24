@@ -1,4 +1,8 @@
 # wechat_robot
+![GitHub Logo](./example/今日话题.png "今日话题")  
+![GitHub Logo](./example/今日话唠.png "今日话唠")  
+
+
 open a shell, and then run this command:  
 ```
 pip3 install pillow

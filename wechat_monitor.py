@@ -66,7 +66,7 @@ def download_pictures(msg):
     # 群名
     group_name = msg['User']['NickName']
     logging.info('收到一个文件: %s', group_name)
-    filter_groups = re.search(r'(达令|电商|开发|答疑|咨询|讨论|系)', group_name, re.M | re.I)
+    filter_groups = re.search(r'(达令|电商|开发|答疑|咨询|讨论|配送|系)', group_name, re.M | re.I)
     if filter_groups is None:  # 不在上述过滤词内
         msg['Text'](msg['FileName'])  # 先下载至本地，分析结束再决定是否删除
         type_symbol = {PICTURE: 'img', VIDEO: 'vid', }.get(msg.type, 'fil')

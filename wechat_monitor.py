@@ -35,6 +35,8 @@ messages_counter = Counter()
 # 发言次数统计
 bad_friends_talk_counter = Counter()
 brother_sister_talk_counter = Counter()
+# 是否已经总结了今日话题
+is_summarized = False
 
 #################################################################################################
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
@@ -141,9 +143,10 @@ def group_msg_monitor(msg):
 
     # 每晚10点，总结当天的聊天主题，以词云形式发出去; 2018.8.21 增加话唠排行榜
     now = time.time()
-    if time.localtime(now).tm_hour == 22 and len(messages_counter) > 100:
+    global is_summarized
+    if time.localtime(now).tm_hour == 22 and not is_summarized:
         name_list, num_list = counter2list(messages_counter.most_common(100))
-        word_cloud('今日话题', name_list, num_list, [12, 108])  # 字体最小12,最大108
+        word_cloud('今日话题', name_list, num_list, [9, 108])  # 字体最小9,最大108
         logging.info(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'))
 
         name_list, num_list = counter2list(bad_friends_talk_counter.most_common(10))  # 话唠前十名
@@ -159,6 +162,8 @@ def group_msg_monitor(msg):
         messages_counter.clear()
         bad_friends_talk_counter.clear()
         brother_sister_talk_counter.clear()
+        # 限制一天只总结一次
+        is_summarized = True
 
 
 @itchat.msg_register(NOTE, isGroupChat=True)
@@ -386,7 +391,7 @@ def get_bar(item_name, item_name_list, item_num_list):
     :param item_num_list: 柱状图的y坐标
     :return:
     """
-    subtitle = "败友群友情统计^_^\n"+time.strftime('%Y-%m-%d', time.localtime())
+    subtitle = "败友群友情统计^_^\n" + time.strftime('%Y-%m-%d', time.localtime())
     bar = Bar(item_name, page_title=item_name, title_text_size=30, title_pos='center', subtitle=subtitle,
               subtitle_text_size=25)
 

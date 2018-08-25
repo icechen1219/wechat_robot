@@ -164,6 +164,8 @@ def group_msg_monitor(msg):
         brother_sister_talk_counter.clear()
         # 限制一天只总结一次
         is_summarized = True
+    if time.localtime(now).tm_hour > 22:
+        is_summarized = False
 
 
 @itchat.msg_register(NOTE, isGroupChat=True)

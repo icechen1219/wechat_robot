@@ -166,8 +166,8 @@ def group_msg_monitor(msg):
         is_summarized = True
         # 按天写入文件，方便后期做更长周期的统计
         date = time.strftime('%m-%d', time.localtime())
-        save_msg_data(bad_friends_talk_counter, 'bad-%s' % date)
-        save_msg_data(brother_sister_talk_counter, 'brother-%s' % date)
+        save_msg_data(bad_friends_talk_counter, './data/bad-%s.json' % date)
+        save_msg_data(brother_sister_talk_counter, './data/brother-%s.json' % date)
 
     if time.localtime(now).tm_hour > 22:
         is_summarized = False

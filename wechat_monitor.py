@@ -1,7 +1,7 @@
 # coding=utf-8
 # author:微信公众号：威扬咨询
 # 基于itchat项目的微信自动回复聊天机器人，纯粹是为了在朋友群里好玩，可以处理文本消息、图片和红包信息。
-
+import codecs
 import logging
 from logging.handlers import RotatingFileHandler
 import itchat
@@ -164,6 +164,11 @@ def group_msg_monitor(msg):
         brother_sister_talk_counter.clear()
         # 限制一天只总结一次
         is_summarized = True
+        # 按天写入文件，方便后期做更长周期的统计
+        date = time.strftime('%m-%d', time.localtime())
+        save_msg_data(bad_friends_talk_counter, 'bad-%s' % date)
+        save_msg_data(brother_sister_talk_counter, 'brother-%s' % date)
+
     if time.localtime(now).tm_hour > 22:
         is_summarized = False
 
@@ -405,6 +410,18 @@ def get_bar(item_name, item_name_list, item_num_list):
     grid.add(bar, grid_top="13%", grid_bottom="23%", grid_left="15%", grid_right="15%")
     out_file_name = '/virtualhost/webapp/love/wechat/' + item_name + '.html'
     grid.render(out_file_name)
+
+
+def save_msg_data(msg_counter, out_file_name):
+    """
+    将聊天记录写入json文件
+    :param msg_counter:
+    :param out_file_name:
+    :return:
+    """
+    with codecs.open(out_file_name, 'w', encoding='utf-8') as json_file:
+        json_file.write(json.dumps(msg_counter, ensure_ascii=False))
+        json_file.close()
 
 
 if __name__ == '__main__':

@@ -147,12 +147,14 @@ def group_msg_monitor(msg):
         logging.info(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'))
 
         name_list, num_list = counter2list(bad_friends_talk_counter.most_common(10))  # 话唠前十名
-        get_bar('今日话唠', name_list, num_list)
-        itchat.send(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话唠.html', 'utf-8'), money_notify_groups)
+        bar_title = u'小群话唠'
+        get_bar(bar_title, name_list, num_list)
+        itchat.send(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'), money_notify_groups)
 
         name_list, num_list = counter2list(brother_sister_talk_counter.most_common(10))  # 话唠前十名
-        get_bar('今日话唠2', name_list, num_list)
-        logging.info(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话唠2.html', 'utf-8'))
+        bar_title = u'大群话唠'
+        get_bar(bar_title, name_list, num_list)
+        logging.info(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
 
         messages_counter.clear()
         bad_friends_talk_counter.clear()
@@ -384,7 +386,7 @@ def get_bar(item_name, item_name_list, item_num_list):
     :param item_num_list: 柱状图的y坐标
     :return:
     """
-    subtitle = "败友群友情统计^_^"
+    subtitle = "败友群友情统计^_^\n"+time.strftime('%Y-%m-%d', time.localtime())
     bar = Bar(item_name, page_title=item_name, title_text_size=30, title_pos='center', subtitle=subtitle,
               subtitle_text_size=25)
 

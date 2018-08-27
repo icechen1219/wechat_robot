@@ -159,15 +159,16 @@ def group_msg_monitor(msg):
         get_bar(bar_title, name_list, num_list)
         logging.info(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
 
-        messages_counter.clear()
-        bad_friends_talk_counter.clear()
-        brother_sister_talk_counter.clear()
         # 限制一天只总结一次
         is_summarized = True
         # 按天写入文件，方便后期做更长周期的统计
         date = time.strftime('%m-%d', time.localtime())
         save_msg_data(bad_friends_talk_counter, './data/bad-%s.json' % date)
         save_msg_data(brother_sister_talk_counter, './data/brother-%s.json' % date)
+        # 清空内存数据
+        messages_counter.clear()
+        bad_friends_talk_counter.clear()
+        brother_sister_talk_counter.clear()
 
     if time.localtime(now).tm_hour > 22:
         is_summarized = False

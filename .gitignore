@@ -2,6 +2,7 @@
 .pytest_cache
 analyse.py
 *.log
+*.log.*
 jieba_test.py
 test.py
 *.html

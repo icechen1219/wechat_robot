@@ -26,3 +26,5 @@ python3 wechat_monitor.py
   * 4. count the time of most msg per day and per week  
   * 5. count top10 per month  
  
+### Trend Analyse per week
+![GitHub Logo](./example/七天走势.png "话题数走势")

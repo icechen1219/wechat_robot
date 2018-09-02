@@ -2,8 +2,6 @@
 # author:微信公众号：威扬咨询
 # 基于itchat项目的微信自动回复聊天机器人，纯粹是为了在朋友群里好玩，可以处理文本消息、图片和红包信息。
 import codecs
-import logging
-from logging.handlers import RotatingFileHandler
 import itchat
 import json
 import requests
@@ -18,6 +16,7 @@ from pyecharts import WordCloud
 from pyecharts import Bar
 from pyecharts import Grid
 from urllib.parse import quote
+import custom_logger
 
 at_msg_dict = ['收到', '这...', '在', '套我话？', '咋啦？', '哦哦', '我不在', '我是隐身的', 'copy that', '……', '哈', '吼吼', '赫赫', '汗']
 
@@ -38,23 +37,6 @@ brother_sister_talk_counter = Counter()
 # 是否已经总结了今日话题
 is_summarized = False
 
-#################################################################################################
-LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
-# 基本的日志系统配置
-# logging.basicConfig(filename='wechat.log', level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
-# 定义一个RotatingFileHandler，最多备份5个日志文件，每个日志文件最大2M
-Rthandler = RotatingFileHandler('event.log', maxBytes=2 * 1024 * 1024, backupCount=5)
-Rthandler.setLevel(logging.INFO)  # 日志处理器的日志级别，只能等于或高于root的日志级别
-formatter = logging.Formatter(LOG_FORMAT, DATE_FORMAT)
-Rthandler.setFormatter(formatter)
-logger = logging.getLogger('')
-logger.setLevel(logging.DEBUG)  # root日志级别，不设置默认为warn
-logger.addHandler(Rthandler)
-
-
-################################################################################################
-
 
 def download_pictures(msg):
     """
@@ -67,19 +49,19 @@ def download_pictures(msg):
         return
     # 群名
     group_name = msg['User']['NickName']
-    logging.info('收到一个文件: %s', group_name)
+    custom_logger.info('收到一个文件: %s' % group_name)
     filter_groups = re.search(r'(达令|电商|开发|答疑|咨询|讨论|配送|系)', group_name, re.M | re.I)
     if filter_groups is None:  # 不在上述过滤词内
         msg['Text'](msg['FileName'])  # 先下载至本地，分析结束再决定是否删除
         type_symbol = {PICTURE: 'img', VIDEO: 'vid', }.get(msg.type, 'fil')
-        logging.debug('@%s@%s', type_symbol, msg.fileName)
-        logging.info('文件来自群：%s', group_name)
+        custom_logger.debug('@%s@%s' % (type_symbol, msg.fileName))
+        custom_logger.info('文件来自群：%s' % group_name)
 
         reply_msg = generate_reply_msg(msg.fileName, msg['ActualNickName'])
         if reply_msg:
-            logging.info(reply_msg)
+            custom_logger.info(reply_msg)
     else:
-        logging.info("此群不用回复！")
+        custom_logger.info("此群不用回复！")
 
 
 def record_text_msg(msg):
@@ -91,11 +73,11 @@ def record_text_msg(msg):
 
     from_group_id_ = msg['FromUserName']  # 收到消息的群的标识
     group_name = msg['User']['NickName']  # 群名
-    logging.debug('收到一条%s群的消息:%s', group_name, msg['Content'])
+    custom_logger.debug('收到一条%s群的消息:%s' % (group_name, msg['Content']))
 
     # 2018.8.17 只记录本群的聊天记录; 2018.8.21 增加我发出去的消息的判断
     if from_group_id_ == money_notify_groups or msg['ToUserName'] == money_notify_groups:
-        logging.debug(u"记录败友群聊天记录...%s", money_notify_groups)
+        custom_logger.debug(u"记录败友群聊天记录...%s" % money_notify_groups)
         get_tag(msg['Content'], messages_counter)
 
     # 处理艾特我的信息，给予简单自动回复
@@ -121,10 +103,10 @@ def group_msg_monitor(msg):
         groups = itchat.get_chatrooms(update=True)
         users = itchat.search_chatrooms(name=u'败友')  # 把红包消息通知给这个群
         money_notify_groups = users[0]['UserName']  # 获取这个群的唯一标识
-        logging.info(u'已获得败友群id: %s' % money_notify_groups)
+        custom_logger.info(u'已获得败友群id: %s' % money_notify_groups)
         users2 = itchat.search_chatrooms(name=u'兄弟姐妹')
         brother_sister_group = users2[0]['UserName']
-        logging.info(u'已获得兄弟姐妹群id: %s' % brother_sister_group)
+        custom_logger.info(u'已获得兄弟姐妹群id: %s' % brother_sister_group)
 
     if msg.type == PICTURE:
         download_pictures(msg)
@@ -134,12 +116,14 @@ def group_msg_monitor(msg):
     if msg['FromUserName'] == money_notify_groups or msg['ToUserName'] == money_notify_groups:
         # 2018.8.21 统计败友群的发言次数
         bad_friends_talk_counter[msg['ActualNickName']] += 1
-        logging.info(bad_friends_talk_counter)
+        custom_logger.info(bad_friends_talk_counter)
+        custom_logger.logmessage("bad", msg['Content'])
 
     if msg['FromUserName'] == brother_sister_group or msg['ToUserName'] == brother_sister_group:
         # 2018.8.23 统计兄弟姐妹群的发言次数
         brother_sister_talk_counter[msg['ActualNickName']] += 1
-        logging.info(brother_sister_talk_counter)
+        custom_logger.info(brother_sister_talk_counter)
+        custom_logger.logmessage("brother", msg['Content'])
 
     # 每晚10点，总结当天的聊天主题，以词云形式发出去; 2018.8.21 增加话唠排行榜
     now = time.time()
@@ -147,17 +131,17 @@ def group_msg_monitor(msg):
     if time.localtime(now).tm_hour == 22 and not is_summarized:
         name_list, num_list = counter2list(messages_counter.most_common(100))
         word_cloud('今日话题', name_list, num_list, [9, 108])  # 字体最小9,最大108
-        logging.info(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'))
+        custom_logger.info(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'))
 
         name_list, num_list = counter2list(bad_friends_talk_counter.most_common(10))  # 话唠前十名
-        bar_title = u'小群话唠'
+        bar_title = u'小群爱群榜'
         get_bar(bar_title, name_list, num_list)
-        itchat.send(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'), money_notify_groups)
+        custom_logger.info(u'贡献值排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
 
         name_list, num_list = counter2list(brother_sister_talk_counter.most_common(10))  # 话唠前十名
-        bar_title = u'大群话唠'
+        bar_title = u'大群爱群榜'
         get_bar(bar_title, name_list, num_list)
-        logging.info(u'话唠排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
+        custom_logger.info(u'贡献值排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
 
         # 限制一天只总结一次
         is_summarized = True
@@ -182,23 +166,23 @@ def receive_red_packet(msg):
     :return:
     """
     if u"收到红包" in msg['Content']:
-        logging.info(u'收到一个群红包')
+        custom_logger.info(u'收到一个群红包')
         group_name = msg['User']['NickName']  # 群名
         global money_notify_groups, groups
         if len(money_notify_groups) == 0:  # 因为群组搜索会产生网络请求，所以只在第一次搜索
             groups = itchat.get_chatrooms(update=True)
             users = itchat.search_chatrooms(name=u'败友')  # 把红包消息通知给这个群
             money_notify_groups = users[0]['UserName']  # 获取这个群的唯一标示
-            logging.info(money_notify_groups)
+            custom_logger.info(money_notify_groups)
         if msg['FromUserName'] == money_notify_groups:  # 2018.8.6 过滤本群的红包通知
-            logging.info(u"同一个群的红包不通知...")
+            custom_logger.info(u"同一个群的红包不通知...")
             return
         match_groups = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
         if match_groups:
             msgbody = u'"%s"群红包,@Tonny @All' % group_name
             itchat.send(msgbody, toUserName=money_notify_groups)  # 告诉指定的好友群内有红包
         else:
-            logging.info("此群红包不用通知那帮二货...")
+            custom_logger.info("此群红包不用通知那帮二货...")
 
         filter_groups = re.search(r'(达令|电商|珠海)', group_name, re.M | re.I)
         if filter_groups is None:  # 不在上述过滤词内
@@ -218,10 +202,10 @@ def deal_at_msg(to_group):
     if is_first_at(to_group):  # 如果是首次艾特，则记录时间，以备后续判断
         first_at_time[to_group] = time.time()
         tmp_msg = at_msg_dict[random.randint(len(at_msg_dict))]
-        logging.info('第一次被艾特：%s', tmp_msg)
+        custom_logger.info('第一次被艾特：%s' % tmp_msg)
     elif is_at_too_many(to_group):
         tmp_msg = ['皮这一下，你们开心了？', '艾特我这么多次，是想发红包吗？', '这么多人想我了？', '爱我你就大声说，何必艾特这么多^_^', '艾特这么多，累不？'][random.randint(5)]
-        logging.info(tmp_msg)
+        custom_logger.info(tmp_msg)
     return tmp_msg
 
 
@@ -247,8 +231,8 @@ def is_at_too_many(to_group):
     :return: True - 恶意艾特，False - 非恶意
     """
     now = time.time()
-    logging.debug(at_msg_counter)
-    logging.debug(first_at_time)
+    custom_logger.debug(at_msg_counter)
+    custom_logger.debug(first_at_time)
     at_num = at_msg_counter[to_group]
     at_time = first_at_time[to_group]
     if (now - at_time) <= 90:  # 设1.5分钟为监测期限
@@ -266,25 +250,25 @@ def generate_reply_msg(image_file_name, user_name):
     :param user_name: 图片的作者
     :return: 可回复的消息或者空
     """
-    logging.info('%s, %s', image_file_name, user_name)
+    custom_logger.info('%s, %s' % (image_file_name, user_name))
     url = 'http://loveboyin.cn/WechatDetect'  # 微信聊天监控API
     files = {'uploadFile': (image_file_name, open(image_file_name, 'rb'))}
     data = {'user': user_name}
     r = requests.post(url, files=files, data=data)
-    logging.info(r.text)
+    custom_logger.info(r.text)
     res_list = json.loads(r.text)
     if res_list['errorCode'] == 0:  # 正常返回数据
         if res_list['faceCount'] > 0:
             reply_msg = guess_person_action(res_list['faceCount'], res_list)  # 猜测人的行为
         else:
-            logging.info('删掉非人类的图片')
+            custom_logger.info('删掉非人类的图片')
             os.remove(image_file_name)  # 人脸以外的图片删掉，浪费内存
             if res_list['isFood']:
                 reply_msg = guess_food_action(time.time())  # 根据时间猜测大家在吃什么饭？
             else:
                 return ''
 
-        logging.info(reply_msg)
+        custom_logger.info(reply_msg)
         return reply_msg
     else:
         return ''
@@ -297,8 +281,8 @@ def guess_person_action(num, res_list):
     :param res_list: 服务器返回的json结果
     :return: 回复内容
     """
-    logging.info("识别出的人数：%s" % num)
-    logging.debug(res_list['faceList'])
+    custom_logger.info("识别出的人数：%s" % num)
+    custom_logger.debug(res_list['faceList'])
     if num == 1:
         score = res_list['faceList'][0]['beauty']  # 颜值
         sex = res_list['faceList'][0]['gender']  # 性别
@@ -308,7 +292,7 @@ def guess_person_action(num, res_list):
         if sex < 50 and (75 < score <= 90):
             return ['经鉴定，美女一枚', '看到美女一天心情就好了', '你们觉得这个姑娘美不美？'][random.randint(3)]
         else:
-            logging.info('要么是男的，要么是长的丑，不理会，嘿嘿...')
+            custom_logger.info('要么是男的，要么是长的丑，不理会，嘿嘿...')
     if num == 2:
         return ['这两个人是谁呀？', '看着眼熟', '他们两个在干啥？', '二人行必有一照'][random.randint(4)]
     if 2 < num <= 5:  # 人多就PK颜值，让大家对话题感兴趣
@@ -330,7 +314,7 @@ def guess_food_action(now):
     :return: 回复内容
     """
     hour = time.localtime(now).tm_hour
-    logging.info('晒美食时间：%d', hour)
+    custom_logger.info('晒美食时间：%d' % hour)
     if hour > 21 or hour < 6:
         return ['深夜投毒啊这是！', '不发红包就胖八斤', '这样拉仇恨好吗？', '又在夜夜笙歌了', '这个时候发吃的，良心不会痛吗？'][random.randint(5)]
     if 6 <= hour <= 10:
@@ -351,13 +335,13 @@ def get_tag(text, cnt):
     """
     text = re.sub(r"\[.*\]", "", text)  # 用正则表达式去掉表情符号
     text = re.sub(r"@\S+?\s+", "", text)  # 去掉艾特的用户信息部分
-    logging.info('正在分析句子:%s', text)
+    custom_logger.info('正在分析句子:%s' % text)
     tag_list = jieba.analyse.extract_tags(text)  # 关键词提取模式
     # tag_list = jieba.cut(text, cut_all=False)  # 直接切词模式
-    logging.info(tag_list)
+    custom_logger.info(tag_list)
     for tag in tag_list:
         cnt[tag] += 1
-    logging.debug(cnt)
+    custom_logger.debug(cnt)
 
 
 def counter2list(_counter):
@@ -431,5 +415,5 @@ if __name__ == '__main__':
     friends = itchat.get_friends(update=True)[0:]  # 获取好友信息
     notify_user = itchat.search_friends(name=u'威扬咨询')[0]
     notify_user.send(u'hello,这是一条来自机器人的消息')
-    logging.warning(u'hello,这是一条来自机器人的消息')
+    custom_logger.info(u'hello,这是一条来自机器人的消息')
     itchat.run()

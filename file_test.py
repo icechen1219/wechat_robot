@@ -4,12 +4,7 @@ import re
 
 date = time.strftime('%m-%d', time.localtime())
 
-# with codecs.open('./data/%s.txt' % date, 'a', 'utf-8') as file:
-#     file.write('Hello World!\n')
-#     file.write('哈哈哈2\n')
-#     file.close()
-
-with codecs.open('./messages.log', 'r', 'utf-8') as logfile:
+with codecs.open('./log/messages.log', 'r', 'utf-8') as logfile:
     for line in logfile:
         print(line)
         time_match = re.search(r'^#(.{19}).+?#\s(.+)', line)

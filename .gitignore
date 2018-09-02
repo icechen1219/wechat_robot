@@ -10,3 +10,5 @@ wechat_robot_bak.py
 analyse
 data
 images
+*.out
+log/

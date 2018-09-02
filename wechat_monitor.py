@@ -117,13 +117,14 @@ def group_msg_monitor(msg):
         # 2018.8.21 统计败友群的发言次数
         bad_friends_talk_counter[msg['ActualNickName']] += 1
         custom_logger.info(bad_friends_talk_counter)
-        custom_logger.logmessage("bad", msg['Content'] if msg.type == TEXT else 'NoneText')
+        custom_logger.logmessage("bad-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else 'NoneText')
 
     if msg['FromUserName'] == brother_sister_group or msg['ToUserName'] == brother_sister_group:
         # 2018.8.23 统计兄弟姐妹群的发言次数
         brother_sister_talk_counter[msg['ActualNickName']] += 1
         custom_logger.info(brother_sister_talk_counter)
-        custom_logger.logmessage("brother", msg['Content'] if msg.type == TEXT else 'NoneText')
+        custom_logger.logmessage("brother-%s" % msg['ActualNickName'],
+                                 msg['Content'] if msg.type == TEXT else 'NoneText')
 
     # 每晚10点，总结当天的聊天主题，以词云形式发出去; 2018.8.21 增加话唠排行榜
     now = time.time()

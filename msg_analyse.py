@@ -99,7 +99,7 @@ if __name__ == '__main__':
             content_match = regex.search(earlest_reply_msg[1])
             if content_match:
                 earlest_time_node = "最早一条发言：%s %s，来自：%s群" % (
-                earlest_reply_msg[0], earlest_reply, content_match.group(1))
+                    earlest_reply_msg[0], earlest_reply, content_match.group(1))
                 print(earlest_time_node)
                 earlest_msg_node = '"%s" 说 「%s」' % (content_match.group(2), content_match.group(3))
                 print(earlest_msg_node)

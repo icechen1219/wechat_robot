@@ -116,8 +116,8 @@ if __name__ == '__main__':
     page = Page()
 
     # line
-    line = Line("群心情走势图", "威扬咨询友情统计", title_text_size=30, subtitle_text_size=18, title_pos='center')
     item_name_list, item_num_list = counter2list(dict2sorted_by_key(date_msg_counter))
+    line = Line("群心情走势图", "截至日期：%s" % item_name_list[len(item_name_list)-1], title_text_size=30, subtitle_text_size=18, title_pos='center')
     line.add("", item_name_list, item_num_list, mark_point=["max"], legend_pos='65%',
              xaxis_interval=0, xaxis_rotate=27, xaxis_label_textsize=20, yaxis_label_textsize=20, yaxis_name_pos='end',
              yaxis_pos="%50")
@@ -132,9 +132,9 @@ if __name__ == '__main__':
             is_label_show=True, legend_orient='vertical', legend_pos='left')
     page.add(pie)
 
-    nodes = [{"name": earlest_time_node, "symbolSize": 10},
+    nodes = [{"name": earlest_time_node, "symbolSize": 30},
              {"name": latest_time_node, "symbolSize": 50},
-             {"name": earlest_msg_node, "symbolSize": 10},
+             {"name": earlest_msg_node, "symbolSize": 30},
              {"name": latest_msg_node, "symbolSize": 50}]
     links = [{"source": nodes[0].get('name'), "target": nodes[2].get('name')},
              {"source": nodes[1].get('name'), "target": nodes[3].get('name')}]
@@ -146,4 +146,4 @@ if __name__ == '__main__':
               label_text_color=None, )
     page.add(graph)
 
-    page.render('./analyse/九月统计与分析.html')
+    page.render('/virtualhost/webapp/love/wechat/九月统计与分析.html')

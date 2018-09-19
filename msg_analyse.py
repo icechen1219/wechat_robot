@@ -3,8 +3,9 @@ import time
 import re
 import math
 from collections import Counter
-from pyecharts import Line, Pie, Graph
+from pyecharts import Line, Pie, Graph, Bar
 from pyecharts import Page
+from snownlp import SnowNLP
 
 date = time.strftime('%m-%d', time.localtime())
 earlest_reply = None
@@ -13,6 +14,7 @@ latest_reply = None
 latest_reply_msg = None
 msg_dict = {}
 date_msg_counter = Counter()
+emotions = []
 
 
 def all_in_page():
@@ -63,7 +65,18 @@ def counter2list(_counter):
     return name_list, num_list
 
 
+def emotions_count(_emotions):
+    count_good = len(list(filter(lambda x: x > 0.66, _emotions)))
+    count_normal = len(list(filter(lambda x: 0.33 <= x <= 0.66, _emotions)))
+    count_bad = len(list(filter(lambda x: x < 0.33, _emotions)))
+    labels = [u'负面消极', u'中性', u'正面积极']
+    values = (count_bad, count_normal, count_good)
+    return labels, values
+
+
 if __name__ == '__main__':
+    # 群消息日志的正则表达式（群标识-发言人-正文），用于提取聊天正文
+    regex = re.compile(r'(.+)\-(.+)\-(.+)', re.I | re.M)
     with codecs.open('./log/merge.log', 'r', 'utf-8') as logfile:
         for line in logfile:
             time_match = re.search(r'^#(.{5}).{5}\s(.{8}).+?#\s(.+)', line)
@@ -80,6 +93,11 @@ if __name__ == '__main__':
                 msg_dict[time_match.group(2)] = (time_match.group(1), time_match.group(3))
                 # 按天统计聊天总数
                 date_msg_counter[time_match.group(1)] += 1
+                content_match = regex.search(time_match.group(3))
+                # 对纯文字聊天进行情感分析（积极指数）
+                if content_match and content_match.group(3) != 'NoneText':
+                    nlp = SnowNLP(content_match.group(3))
+                    emotions.append(nlp.sentiments)
 
         # print(msg_dict)
         msg_list = dict2sorted_by_key(msg_dict)
@@ -92,7 +110,6 @@ if __name__ == '__main__':
         print("发言最多的一天：%s %s条" % (most_msg_count[0], most_msg_count[1]))
         print("发言最少的一天：%s %s条" % (dict_sorted_by_value[0][0], dict_sorted_by_value[0][1]))
 
-        regex = re.compile(r'(.+)\-(.+)\-(.+)', re.I | re.M)
         if len(msg_list) > 0:
             earlest_reply = msg_list[0][0]
             earlest_reply_msg = msg_list[0][1]
@@ -117,21 +134,29 @@ if __name__ == '__main__':
 
     # line
     item_name_list, item_num_list = counter2list(dict2sorted_by_key(date_msg_counter))
-    line = Line("群心情走势图", "截至日期：%s" % item_name_list[len(item_name_list)-1], title_text_size=30, subtitle_text_size=18, title_pos='center')
+    line = Line("群心情走势图", "截至日期：%s" % item_name_list[len(item_name_list) - 1], title_text_size=30,
+                subtitle_text_size=18, title_pos='center')
     line.add("", item_name_list, item_num_list, mark_point=["max"], legend_pos='65%',
              xaxis_interval=0, xaxis_rotate=27, xaxis_label_textsize=20, yaxis_label_textsize=20, yaxis_name_pos='end',
-             yaxis_pos="%50")
+             yaxis_pos="%50", is_label_show=True)
     page.add(line)
 
     # pie
     attr = ["总发言数", "日均发言", "发言最多", "发言最少"]
     v1 = [len(msg_list), math.floor(len(msg_list) / len(date_msg_counter)), most_msg_count[1],
           dict_sorted_by_value[0][1]]
-    pie = Pie("群聊特点分析", title_pos='center')
+    pie = Pie("群聊数据统计", title_pos='center')
     pie.add("", attr, v1, radius=[40, 75], label_text_color=None,
             is_label_show=True, legend_orient='vertical', legend_pos='left')
     page.add(pie)
 
+    # bar
+    bar = Bar("群聊情感分析", title_pos='center')
+    item_name_list, item_num_list = emotions_count(emotions)
+    bar.add("", item_name_list, item_num_list, title_pos='center', is_label_show=True)
+    page.add(bar)
+
+    # graph
     nodes = [{"name": earlest_time_node, "symbolSize": 30},
              {"name": latest_time_node, "symbolSize": 50},
              {"name": earlest_msg_node, "symbolSize": 30},
@@ -140,10 +165,9 @@ if __name__ == '__main__':
              {"source": nodes[1].get('name'), "target": nodes[3].get('name')}]
 
     graph = Graph("爱群关系图", title_pos='center')
-    graph.add("", nodes, links, is_label_show=False,
-              graph_repulsion=8000,
-              graph_layout="circular",
-              label_text_color=None, )
+    graph.add("", nodes, links, is_label_show=True, graph_repulsion=8000, graph_layout="circular",
+              label_text_color=None)
     page.add(graph)
 
-    page.render('/virtualhost/webapp/love/wechat/九月统计与分析.html')
+    page.render('./analyse/九月统计与分析.html')
+    # page.render('/virtualhost/webapp/love/wechat/九月统计与分析.html')

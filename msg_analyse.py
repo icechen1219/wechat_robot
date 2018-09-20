@@ -3,9 +3,10 @@ import time
 import re
 import math
 from collections import Counter
-from pyecharts import Line, Pie, Graph, Bar
+from pyecharts import Line, Pie, Graph, Bar, WordCloud
 from pyecharts import Page
 from snownlp import SnowNLP
+import wechat_monitor
 
 date = time.strftime('%m-%d', time.localtime())
 earlest_reply = None
@@ -15,6 +16,7 @@ latest_reply_msg = None
 msg_dict = {}
 date_msg_counter = Counter()
 emotions = []
+keywords_counter = Counter()
 
 
 def all_in_page():
@@ -81,7 +83,7 @@ if __name__ == '__main__':
         for line in logfile:
             time_match = re.search(r'^#(.{5}).{5}\s(.{8}).+?#\s(.+)', line)
             if time_match:
-                print(time_match.group(0))  # 整行日志
+                # print(time_match.group(0))  # 整行日志
                 # print(time_match.group(1))  # 日期
                 # print(time_match.group(2))  # 时间
                 # print(time_match.group(3))  # 消息正文
@@ -98,6 +100,7 @@ if __name__ == '__main__':
                 if content_match and content_match.group(3) != 'NoneText':
                     nlp = SnowNLP(content_match.group(3))
                     emotions.append(nlp.sentiments)
+                    wechat_monitor.get_tag(content_match.group(3), keywords_counter)
 
         # print(msg_dict)
         msg_list = dict2sorted_by_key(msg_dict)
@@ -168,6 +171,12 @@ if __name__ == '__main__':
     graph.add("", nodes, links, is_label_show=True, graph_repulsion=8000, graph_layout="circular",
               label_text_color=None)
     page.add(graph)
+
+    # wordcloud
+    item_name_list, item_num_list = counter2list(keywords_counter.most_common(100))
+    wordcloud = WordCloud("话题排行", title_pos='center', width=800, height=800)
+    wordcloud.add("", item_name_list, item_num_list, word_size_range=[9, 108], shape='circle')
+    page.add(wordcloud)
 
     page.render('./analyse/九月统计与分析.html')
     # page.render('/virtualhost/webapp/love/wechat/九月统计与分析.html')

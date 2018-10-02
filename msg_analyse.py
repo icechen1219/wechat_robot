@@ -140,7 +140,7 @@ if __name__ == '__main__':
     line = Line("群心情走势图", "截至日期：%s" % item_name_list[len(item_name_list) - 1], title_text_size=30,
                 subtitle_text_size=18, title_pos='center')
     line.add("", item_name_list, item_num_list, mark_point=["max"], legend_pos='65%',
-             xaxis_interval=0, xaxis_rotate=27, xaxis_label_textsize=20, yaxis_label_textsize=20, yaxis_name_pos='end',
+             xaxis_interval=2, xaxis_rotate=27, xaxis_label_textsize=20, yaxis_label_textsize=20, yaxis_name_pos='end',
              yaxis_pos="%50", is_label_show=True)
     page.add(line)
 
@@ -149,14 +149,15 @@ if __name__ == '__main__':
     v1 = [len(msg_list), math.floor(len(msg_list) / len(date_msg_counter)), most_msg_count[1],
           dict_sorted_by_value[0][1]]
     pie = Pie("群聊数据统计", title_pos='center')
-    pie.add("", attr, v1, radius=[40, 75], label_text_color=None,
-            is_label_show=True, legend_orient='vertical', legend_pos='left')
+    pie.add("", attr, v1, radius=[40, 75], label_text_color=None, is_label_show=True, legend_orient='vertical',
+            legend_pos='left')
     page.add(pie)
 
     # bar
     bar = Bar("群聊情感分析", title_pos='center')
     item_name_list, item_num_list = emotions_count(emotions)
-    bar.add("", item_name_list, item_num_list, title_pos='center', is_label_show=True)
+    bar.add("", item_name_list, item_num_list, title_pos='center', is_label_show=True, xaxis_label_textsize=20,
+            yaxis_label_textsize=20)
     page.add(bar)
 
     # graph
@@ -169,13 +170,13 @@ if __name__ == '__main__':
 
     graph = Graph("爱群关系图", title_pos='center')
     graph.add("", nodes, links, is_label_show=True, graph_repulsion=8000, graph_layout="circular",
-              label_text_color=None)
+              label_text_color=None, label_emphasis_textsize=20)
     page.add(graph)
 
     # wordcloud
     item_name_list, item_num_list = counter2list(keywords_counter.most_common(100))
-    wordcloud = WordCloud("话题排行", title_pos='center', width=800, height=800)
-    wordcloud.add("", item_name_list, item_num_list, word_size_range=[9, 108], shape='circle')
+    wordcloud = WordCloud("话题排行", title_pos='center', width=800, height=600)
+    wordcloud.add("", item_name_list, item_num_list, word_size_range=[12, 72], shape='circle')
     page.add(wordcloud)
 
     page.render('./analyse/九月统计与分析.html')

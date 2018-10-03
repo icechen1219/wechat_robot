@@ -13,3 +13,8 @@ images
 *.out
 log/
 __pycache__
+log_test.py
+log_test2.py
+re_test.py
+wechat_robot.py
+

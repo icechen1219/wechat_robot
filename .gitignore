@@ -13,3 +13,5 @@ images
 *.out
 log/
 __pycache__
+*.png
+*.jp*g

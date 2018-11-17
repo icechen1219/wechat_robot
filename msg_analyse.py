@@ -77,20 +77,14 @@ def emotions_count(_emotions):
 
 
 if __name__ == '__main__':
+    current_month = 0
     # 群消息日志的正则表达式（群标识-发言人-正文），用于提取聊天正文
     regex = re.compile(r'(.+)\-(.+)\-(.+)', re.I | re.M)
     with codecs.open('./log/merge.log', 'r', 'utf-8') as logfile:
         for line in logfile:
             time_match = re.search(r'^#(.{5}).{5}\s(.{8}).+?#\s(.+)', line)
             if time_match:
-                # print(time_match.group(0))  # 整行日志
-                # print(time_match.group(1))  # 日期
-                # print(time_match.group(2))  # 时间
-                # print(time_match.group(3))  # 消息正文
-                # 字符串转时间
-                # date = time.strptime(time_match.group(1) + " " + time_match.group(2), "%m/%d/%Y %H:%M:%S")
-                # 时间转时间戳
-                # print(time.mktime(date))
+                current_month = time_match.group(1)[0:2]
                 # 以时间为key，将每条信息存入dict，方便后续做排序统计
                 msg_dict[time_match.group(2)] = (time_match.group(1), time_match.group(3))
                 # 按天统计聊天总数
@@ -179,5 +173,7 @@ if __name__ == '__main__':
     wordcloud.add("", item_name_list, item_num_list, word_size_range=[12, 72], shape='circle')
     page.add(wordcloud)
 
-    page.render('./analyse/九月统计与分析.html')
-    # page.render('/virtualhost/webapp/love/wechat/九月统计与分析.html')
+    file_path = '/virtualhost/webapp/love/wechat/%s月统计与分析.html' % current_month
+    # file_path = './analyse/%s月统计与分析.html' % current_month
+    page.render(file_path)
+    print('http://loveboyin.cn/wechat/%s月统计与分析.html' % current_month)

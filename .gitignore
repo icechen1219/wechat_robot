@@ -13,6 +13,8 @@ images
 *.out
 log/
 __pycache__
+*.png
+*.jp*g
 log_test.py
 log_test2.py
 re_test.py

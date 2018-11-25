@@ -13,7 +13,7 @@ def logmessage(chat_from, chat_msg):
 
 def foodie_debug(chat_from, chat_msg):
     logger = logging.getLogger("msgLogger2")
-    logger.debug("%s-%s", chat_from, chat_msg)
+    logger.info("%s-%s", chat_from, chat_msg)
 
 
 def foodie_warn(chat_from, chat_msg):

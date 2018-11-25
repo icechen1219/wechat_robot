@@ -110,16 +110,15 @@ def group_msg_monitor(msg):
 
     if msg['FromUserName'] == money_notify_groups or msg['ToUserName'] == money_notify_groups:
         # 2018.8.21 统计败友群的发言次数
-        custom_logger.logmessage("bad-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else 'NoneText')
+        custom_logger.logmessage("bad-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else msg.type)
 
     if msg['FromUserName'] == brother_sister_group or msg['ToUserName'] == brother_sister_group:
         # 2018.8.23 统计兄弟姐妹群的发言次数
-        custom_logger.logmessage("brother-%s" % msg['ActualNickName'],
-                                 msg['Content'] if msg.type == TEXT else 'NoneText')
+        custom_logger.logmessage("brother-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else msg.type)
 
     if msg['FromUserName'] == beauty_foodie_group or msg['ToUserName'] == beauty_foodie_group:
         # 2018.11.25 统计吃货群的发言次数
-        custom_logger.foodie_debug("颜值吃货-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else 'NoneText')
+        custom_logger.foodie_debug("颜值吃货-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else msg.type)
 
 
 @itchat.msg_register(NOTE, isGroupChat=True)
@@ -147,7 +146,7 @@ def receive_red_packet(msg):
             itchat.send(msgbody, toUserName=money_notify_groups)  # 告诉指定的好友群内有红包
             if '颜值吃货' in group_name:
                 custom_logger.foodie_warn("颜值吃货", "收到红包")
-                custom_logger.info(msg)
+                custom_logger.debug(msg)
         else:
             custom_logger.info("此群红包不用通知那帮二货...")
 

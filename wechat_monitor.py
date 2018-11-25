@@ -15,7 +15,6 @@ import jieba.analyse
 from pyecharts import WordCloud
 from pyecharts import Bar
 from pyecharts import Grid
-from urllib.parse import quote
 import custom_logger
 
 at_msg_dict = ['收到', '这...', '在', '套我话？', '咋啦？', '哦哦', '我不在', '我是隐身的', 'copy that', '……', '哈', '吼吼', '赫赫', '汗']
@@ -27,15 +26,11 @@ first_at_time = {}
 money_notify_groups = ''
 # 兄弟姐妹群id
 brother_sister_group = ''
+# 吃货群的id
+beauty_foodie_group = ''
 groups = None
+# 我的微信小号
 notify_user = None
-# 聊天记录关键词
-messages_counter = Counter()
-# 发言次数统计
-bad_friends_talk_counter = Counter()
-brother_sister_talk_counter = Counter()
-# 是否已经总结了今日话题
-is_summarized = False
 
 
 def download_pictures(msg):
@@ -78,7 +73,6 @@ def record_text_msg(msg):
     # 2018.8.17 只记录本群的聊天记录; 2018.8.21 增加我发出去的消息的判断
     if from_group_id_ == money_notify_groups or msg['ToUserName'] == money_notify_groups:
         custom_logger.debug(u"记录败友群聊天记录...%s" % money_notify_groups)
-        get_tag(msg['Content'], messages_counter)
 
     # 处理艾特我的信息，给予简单自动回复
     match_groups = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
@@ -98,7 +92,7 @@ def group_msg_monitor(msg):
     :param msg:
     :return:
     """
-    global money_notify_groups, brother_sister_group, groups
+    global money_notify_groups, brother_sister_group, groups, beauty_foodie_group
     if len(money_notify_groups) == 0:  # 因为群组搜索会产生网络请求，所以只在第一次搜索
         groups = itchat.get_chatrooms(update=True)
         users = itchat.search_chatrooms(name=u'败友')  # 把红包消息通知给这个群
@@ -107,6 +101,7 @@ def group_msg_monitor(msg):
         users2 = itchat.search_chatrooms(name=u'兄弟姐妹')
         brother_sister_group = users2[0]['UserName']
         custom_logger.info(u'已获得兄弟姐妹群id: %s' % brother_sister_group)
+        beauty_foodie_group = itchat.search_chatrooms(name=u'颜值吃货')[0]['UserName']
 
     if msg.type == PICTURE:
         download_pictures(msg)
@@ -115,48 +110,16 @@ def group_msg_monitor(msg):
 
     if msg['FromUserName'] == money_notify_groups or msg['ToUserName'] == money_notify_groups:
         # 2018.8.21 统计败友群的发言次数
-        bad_friends_talk_counter[msg['ActualNickName']] += 1
-        custom_logger.info(bad_friends_talk_counter)
         custom_logger.logmessage("bad-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else 'NoneText')
 
     if msg['FromUserName'] == brother_sister_group or msg['ToUserName'] == brother_sister_group:
         # 2018.8.23 统计兄弟姐妹群的发言次数
-        brother_sister_talk_counter[msg['ActualNickName']] += 1
-        custom_logger.info(brother_sister_talk_counter)
         custom_logger.logmessage("brother-%s" % msg['ActualNickName'],
                                  msg['Content'] if msg.type == TEXT else 'NoneText')
 
-    # 每晚10点，总结当天的聊天主题，以词云形式发出去; 2018.8.21 增加话唠排行榜
-    now = time.time()
-    global is_summarized
-    if time.localtime(now).tm_hour == 22 and not is_summarized:
-        name_list, num_list = counter2list(messages_counter.most_common(100))
-        word_cloud('今日话题', name_list, num_list, [9, 108])  # 字体最小9,最大108
-        custom_logger.info(u'今日话题总结：\nhttps://loveboyin.cn/wechat/%s' % quote('今日话题.html', 'utf-8'))
-
-        name_list, num_list = counter2list(bad_friends_talk_counter.most_common(10))  # 话唠前十名
-        bar_title = u'小群爱群榜'
-        get_bar(bar_title, name_list, num_list)
-        custom_logger.info(u'贡献值排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
-
-        name_list, num_list = counter2list(brother_sister_talk_counter.most_common(10))  # 话唠前十名
-        bar_title = u'大群爱群榜'
-        get_bar(bar_title, name_list, num_list)
-        custom_logger.info(u'贡献值排行榜：\nhttps://loveboyin.cn/wechat/%s.html' % quote(bar_title, 'utf-8'))
-
-        # 限制一天只总结一次
-        is_summarized = True
-        # 按天写入文件，方便后期做更长周期的统计
-        date = time.strftime('%m-%d', time.localtime())
-        save_msg_data(bad_friends_talk_counter, './data/bad-%s.json' % date)
-        save_msg_data(brother_sister_talk_counter, './data/brother-%s.json' % date)
-        # 清空内存数据
-        messages_counter.clear()
-        bad_friends_talk_counter.clear()
-        brother_sister_talk_counter.clear()
-
-    if time.localtime(now).tm_hour > 22:
-        is_summarized = False
+    if msg['FromUserName'] == beauty_foodie_group or msg['ToUserName'] == beauty_foodie_group:
+        # 2018.11.25 统计吃货群的发言次数
+        custom_logger.foodie_debug("颜值吃货-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else 'NoneText')
 
 
 @itchat.msg_register(NOTE, isGroupChat=True)
@@ -182,6 +145,9 @@ def receive_red_packet(msg):
         if match_groups:
             msgbody = u'"%s"群红包,@Tonny @All' % group_name
             itchat.send(msgbody, toUserName=money_notify_groups)  # 告诉指定的好友群内有红包
+            if '颜值吃货' in group_name:
+                custom_logger.foodie_warn("颜值吃货", "收到红包")
+                custom_logger.info(msg)
         else:
             custom_logger.info("此群红包不用通知那帮二货...")
 

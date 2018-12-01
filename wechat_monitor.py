@@ -108,17 +108,21 @@ def group_msg_monitor(msg):
     elif msg.type == TEXT:
         record_text_msg(msg)
 
+    talker = msg['ActualNickName']
+    # 去掉非单词字符
+    talker = re.sub(r"[^\w\u4e00-\u9fa5]", "", talker)
+
     if msg['FromUserName'] == money_notify_groups or msg['ToUserName'] == money_notify_groups:
         # 2018.8.21 统计败友群的发言次数
-        custom_logger.logmessage("bad-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else msg.type)
+        custom_logger.logmessage("bad-%s" % talker, msg['Content'] if msg.type == TEXT else msg.type)
 
     if msg['FromUserName'] == brother_sister_group or msg['ToUserName'] == brother_sister_group:
         # 2018.8.23 统计兄弟姐妹群的发言次数
-        custom_logger.logmessage("brother-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else msg.type)
+        custom_logger.logmessage("brother-%s" % talker, msg['Content'] if msg.type == TEXT else msg.type)
 
     if msg['FromUserName'] == beauty_foodie_group or msg['ToUserName'] == beauty_foodie_group:
         # 2018.11.25 统计吃货群的发言次数
-        custom_logger.foodie_debug("颜值吃货-%s" % msg['ActualNickName'], msg['Content'] if msg.type == TEXT else msg.type)
+        custom_logger.foodie_debug("颜值吃货-%s" % talker, msg['Content'] if msg.type == TEXT else msg.type)
 
 
 @itchat.msg_register(NOTE, isGroupChat=True)

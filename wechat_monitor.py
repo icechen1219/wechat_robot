@@ -26,7 +26,7 @@ first_at_time = {}
 money_notify_groups = ''
 # 兄弟姐妹群id
 brother_sister_group = ''
-# 吃货群的id
+# 胡吃海喝群的id
 beauty_foodie_group = ''
 groups = None
 # 我的微信小号
@@ -75,7 +75,7 @@ def record_text_msg(msg):
         custom_logger.debug(u"记录败友群聊天记录...%s" % money_notify_groups)
 
     # 处理艾特我的信息，给予简单自动回复
-    match_groups = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
+    match_groups = re.search(r'(兄弟|西大|读书|广州|胡吃海喝|深圳)', group_name, re.M | re.I)
     if match_groups is None:  # 只处理上述群
         return
     if msg['IsAt']:
@@ -101,7 +101,7 @@ def group_msg_monitor(msg):
         users2 = itchat.search_chatrooms(name=u'兄弟姐妹')
         brother_sister_group = users2[0]['UserName']
         custom_logger.info(u'已获得兄弟姐妹群id: %s' % brother_sister_group)
-        beauty_foodie_group = itchat.search_chatrooms(name=u'颜值吃货')[0]['UserName']
+        beauty_foodie_group = itchat.search_chatrooms(name=u'胡吃海喝')[0]['UserName']
 
     if msg.type == PICTURE:
         download_pictures(msg)
@@ -121,7 +121,7 @@ def group_msg_monitor(msg):
         custom_logger.logmessage("brother-%s" % talker, msg['Content'] if msg.type == TEXT else msg.type)
 
     if msg['FromUserName'] == beauty_foodie_group or msg['ToUserName'] == beauty_foodie_group:
-        # 2018.11.25 统计吃货群的发言次数
+        # 2018.11.25 统计胡吃海喝群的发言次数
         custom_logger.foodie_debug("颜值吃货-%s" % talker, msg['Content'] if msg.type == TEXT else msg.type)
 
 
@@ -144,12 +144,12 @@ def receive_red_packet(msg):
         if msg['FromUserName'] == money_notify_groups:  # 2018.8.6 过滤本群的红包通知
             custom_logger.info(u"同一个群的红包不通知...")
             return
-        match_groups = re.search(r'(兄弟|西大|读书|广州|吃货|深圳)', group_name, re.M | re.I)
+        match_groups = re.search(r'(兄弟|西大|读书|广州|胡吃海喝|深圳)', group_name, re.M | re.I)
         if match_groups:
             msgbody = u'"%s"群红包,@Tonny @All' % group_name
             itchat.send(msgbody, toUserName=money_notify_groups)  # 告诉指定的好友群内有红包
-            if '颜值吃货' in group_name:
-                custom_logger.foodie_warn("颜值吃货", "收到红包")
+            if '胡吃海喝' in group_name:
+                custom_logger.foodie_warn("胡吃海喝", "收到红包")
                 custom_logger.debug(msg)
         else:
             custom_logger.info("此群红包不用通知那帮二货...")

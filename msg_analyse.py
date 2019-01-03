@@ -7,6 +7,7 @@ from pyecharts import Line, Pie, Graph, Bar, WordCloud
 from pyecharts import Page
 from snownlp import SnowNLP
 import wechat_monitor
+from itchat import content
 
 date = time.strftime('%m-%d', time.localtime())
 earlest_reply = None
@@ -91,7 +92,7 @@ if __name__ == '__main__':
                 date_msg_counter[time_match.group(1)] += 1
                 content_match = regex.search(time_match.group(3))
                 # 对纯文字聊天进行情感分析（积极指数）
-                if content_match and content_match.group(3) != 'NoneText':
+                if content_match and content_match.group(3) not in content.INCOME_MSG:
                     nlp = SnowNLP(content_match.group(3))
                     emotions.append(nlp.sentiments)
                     wechat_monitor.get_tag(content_match.group(3), keywords_counter)
